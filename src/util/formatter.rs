@@ -1,6 +1,6 @@
 extern crate termion;
 
-use termion::{style, color};
+use termion::{color, style};
 
 pub fn format_prompt(s: &str) -> String {
     format!(
