@@ -7,7 +7,7 @@ use termion::{clear, color, style};
 
 use crate::util::formatter;
 
-fn read_u8(prompt: &str, typ: &str, max: u8) -> Result<u8, &'static str> {
+fn read_u8(prompt: &str, typ: &str, max: u8, min: u8) -> Result<u8, &'static str> {
     println!("{}{}", clear::All, formatter::format_prompt(prompt));
     let mut rl = Editor::<()>::new();
     let ret: u8;
@@ -22,6 +22,15 @@ fn read_u8(prompt: &str, typ: &str, max: u8) -> Result<u8, &'static str> {
                             "{}",
                             formatter::format_error(
                                 format!("maximum of {} for {}", max, typ).as_str()
+                            )
+                        );
+                        continue;
+                    }
+                    if num < min {
+                        println!(
+                            "{}",
+                            formatter::format_error(
+                                format!("minimum of {} for {}", min, typ).as_str()
                             )
                         );
                         continue;
@@ -47,11 +56,11 @@ fn read_u8(prompt: &str, typ: &str, max: u8) -> Result<u8, &'static str> {
 }
 
 pub fn read_players() -> Result<u8, &'static str> {
-    read_u8("Enter the number of players", "players", 6)
+    read_u8("Enter the number of players", "players", 6, 1)
 }
 
 pub fn read_substr_len() -> Result<u8, &'static str> {
-    read_u8("Enter the substring length", "substring", 10)
+    read_u8("Enter the substring length", "substring", 10, 3)
 }
 
 pub fn read_assist() -> Result<bool, &'static str> {
@@ -92,7 +101,7 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
     println!(
         "{}{}",
         clear::All,
-        formatter::format_prompt("Enter the characters you want to play with, type 'exit' to stop")
+        formatter::format_prompt("Enter the characters you want to play with\nType '-exit' to stop\n     '-chars' to list all inputs")
     );
     let mut ret = HashSet::<char>::new();
     let mut rl = Editor::<()>::new();
@@ -101,9 +110,10 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
         let readline = rl.readline("> ");
         match readline {
             Ok(line) => {
+                println!("{}", line.len());
                 let lower = line.to_lowercase();
-                if lower == "exit" {
-                    if ret.len() < 3 {
+                if lower == "-exit" {
+                    if ret.len() < 2 {
                         println!(
                             "{}",
                             formatter::format_error("cannot exit before at least 2 characters")
@@ -113,6 +123,14 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
                     }
                     return Ok(ret);
                 }
+                if lower == "-chars" {
+                    if ret.len() == 0 {
+                        println!("None");
+                        continue;
+                    }
+                    println!("{:?}", &ret);
+                    continue;
+                }
                 if line.len() > 1 {
                     if !warning {
                         println!("warning: entering more than 1 character at once will add all characters separately");
@@ -121,7 +139,7 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
                 }
                 for c in line.chars() {
                     if ret.contains(&c) {
-                        println!("info: ignoring {} as it has already been added", &c);
+                        println!("warning: ignoring {} as it has already been added", &c);
                         continue;
                     }
                     ret.insert(c);
