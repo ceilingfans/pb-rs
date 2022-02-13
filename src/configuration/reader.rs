@@ -5,10 +5,11 @@ use std::collections::HashSet;
 use rustyline::{error::ReadlineError, Editor};
 use termion::clear;
 
-use crate::util::formatter;
+use crate::util::printer;
 
 fn read_u8(prompt: &str, typ: &str, max: u8, min: u8) -> Result<u8, &'static str> {
-    println!("{}{}", clear::All, formatter::format_prompt(prompt));
+    printer::clear_screen();
+    printer::print_prompt(prompt);
     let mut rl = Editor::<()>::new();
     let ret: u8;
     loop {
@@ -18,27 +19,17 @@ fn read_u8(prompt: &str, typ: &str, max: u8, min: u8) -> Result<u8, &'static str
                 let n = line.parse::<u8>();
                 if let Ok(num) = n {
                     if num > max {
-                        println!(
-                            "{}",
-                            formatter::format_error(
-                                format!("maximum of {} for {}", max, typ).as_str()
-                            )
-                        );
+                        printer::print_error(format!("maximum of {} for {}", max, typ).as_str());
                         continue;
                     }
                     if num < min {
-                        println!(
-                            "{}",
-                            formatter::format_error(
-                                format!("minimum of {} for {}", min, typ).as_str()
-                            )
-                        );
+                        printer::print_error(format!("minimum of {} for {}", max, typ).as_str());
                         continue;
                     }
                     ret = num;
                     break;
                 } else {
-                    println!("{}", formatter::format_error("number entered was invalid"));
+                    printer::print_error("number entered is invalid");
                     continue;
                 }
             }
@@ -64,25 +55,20 @@ pub fn read_substr_len() -> Result<u8, &'static str> {
 }
 
 pub fn read_assist() -> Result<bool, &'static str> {
-    println!(
-        "{}{}",
-        clear::All,
-        formatter::format_prompt("Do you want assistance? (y)es/(n)o")
-    );
+    printer::clear_screen();
+    printer::print_prompt("Do you want assistance? (y)es/(n)o");
     let mut rl = Editor::<()>::new();
-    let mut choices = vec!["n", "no"];
-    let mut yes = vec!["y", "ye", "yes"];
-    choices.append(&mut yes);
+    let no = vec!["n", "no"];
+    let yes = vec!["y", "ye", "yes"];
     loop {
         let readline = rl.readline("> ");
         match readline {
             Ok(line) => {
                 let lower = line.to_lowercase();
-                if !choices.contains(&lower.as_str()) {
-                    println!("{}", formatter::format_error("invalid choice"));
+                if !no.contains(&lower.as_str()) && !yes.contains(&lower.as_str()) {
+                    printer::print_error("invalid choice");
                     continue;
                 }
-
                 return Ok(yes.contains(&lower.as_str()));
             }
             Err(ReadlineError::Interrupted | ReadlineError::Eof) => {
@@ -98,11 +84,8 @@ pub fn read_assist() -> Result<bool, &'static str> {
 }
 
 pub fn read_chars() -> Result<HashSet<char>, &'static str> {
-    println!(
-        "{}{}",
-        clear::All,
-        formatter::format_prompt("Enter the characters you want to play with\nType '-exit' to stop\n     '-chars' to list all inputs")
-    );
+    printer::clear_screen();
+    printer::print_prompt("Enter the characters you want to play with\nType '-exit' to stop\n     '-chars' to list all inputs");
     let mut ret = HashSet::<char>::new();
     let mut rl = Editor::<()>::new();
     let mut warning = false;
@@ -114,10 +97,7 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
                 let lower = line.to_lowercase();
                 if lower == "-exit" {
                     if ret.len() < 2 {
-                        println!(
-                            "{}",
-                            formatter::format_error("cannot exit before at least 2 characters")
-                        );
+                        printer::print_error("cannot exit before at least 2 characters");
                         warning = true;
                         continue;
                     }
@@ -143,6 +123,37 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
                         continue;
                     }
                     ret.insert(c);
+                }
+            }
+            Err(ReadlineError::Interrupted | ReadlineError::Eof) => {
+                println!("Successfully exited.");
+                std::process::exit(0);
+            }
+            Err(e) => {
+                println!("Unknown Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+    }
+}
+
+pub fn read_choice(set: &HashSet<char>) -> char {
+    let mut rl = Editor::<()>::new();
+    loop {
+        let readline = rl.readline("> ");
+        match readline {
+            Ok(line) => {
+                if line.len() > 1 {
+                    println!("warning: using more than 1 character will result in the first character being chosen");
+                }
+                let input = line.chars().next(); // get first char
+                if let Some(c) = input {
+                    if set.contains(&c) {
+                        return c;
+                    } else {
+                        printer::print_error(format!("{} is not a valid choice", c).as_str());
+                        continue;
+                    }
                 }
             }
             Err(ReadlineError::Interrupted | ReadlineError::Eof) => {
