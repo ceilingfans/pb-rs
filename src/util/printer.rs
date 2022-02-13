@@ -22,7 +22,7 @@ pub fn print_error(msg: &str) {
         color::Fg(color::Red),
         style::Reset,
         msg,
-    )
+    );
 }
 
 pub fn print_win(player: u8) {
@@ -32,7 +32,7 @@ pub fn print_win(player: u8) {
         color::Fg(color::Yellow),
         style::Reset,
         player,
-    )
+    );
 }
 
 pub fn print_loss(player: u8) {
@@ -42,7 +42,21 @@ pub fn print_loss(player: u8) {
         color::Fg(color::Red),
         style::Reset,
         player
-    )
+    );
+}
+
+pub fn print_loss_computer(player: u8, start: bool) {
+    // human
+    if (player == 1 && start) || (player == 2 && start) {
+        print_loss(player);
+    } else {
+        println!(
+            "{}{}Yay!{} You have won!",
+            style::Bold,
+            color::Fg(color::Yellow),
+            style::Reset,
+        );
+    }
 }
 
 pub fn clear_screen() {
