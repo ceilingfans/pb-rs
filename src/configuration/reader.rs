@@ -23,7 +23,7 @@ fn read_u8(prompt: &str, typ: &str, max: u8, min: u8) -> Result<u8, &'static str
                         continue;
                     }
                     if num < min {
-                        printer::print_error(format!("minimum of {} for {}", max, typ).as_str());
+                        printer::print_error(format!("minimum of {} for {}", min, typ).as_str());
                         continue;
                     }
                     ret = num;
@@ -93,7 +93,6 @@ pub fn read_chars() -> Result<HashSet<char>, &'static str> {
         let readline = rl.readline("> ");
         match readline {
             Ok(line) => {
-                println!("{}", line.len());
                 let lower = line.to_lowercase();
                 if lower == "-exit" {
                     if ret.len() < 2 {
