@@ -1,5 +1,3 @@
-extern crate termion;
-
 use std::collections::HashSet;
 
 use rustyline::{error::ReadlineError, Editor};

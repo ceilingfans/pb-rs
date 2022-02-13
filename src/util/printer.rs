@@ -1,6 +1,5 @@
 extern crate termion;
 
-use termion::color::Red;
 use termion::{clear, color, style};
 
 use substring::Substring;
