@@ -3,7 +3,7 @@ extern crate termion;
 use std::collections::HashSet;
 
 use rustyline::{error::ReadlineError, Editor};
-use termion::{clear, color, style};
+use termion::clear;
 
 use crate::util::formatter;
 
