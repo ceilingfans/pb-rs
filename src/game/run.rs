@@ -1,9 +1,6 @@
-extern crate termion;
-
 use rustyline::{error::ReadlineError, Editor};
 use std::collections::HashSet;
 use substring::Substring;
-use termion::clear;
 
 use crate::configuration::{options::*, reader::*};
 use crate::util::printer;
@@ -58,7 +55,7 @@ impl Game {
     }
 
     pub fn run(&mut self) -> i32 {
-        // TODO: loss stack
+        printer::clear_screen();
         // TODO: single player
         if self.options.players == 1 {
             println!("Single player against a computer has not been implemented yet");
@@ -87,6 +84,14 @@ impl Game {
                 }
                 // end options check
 
+                // print out current game string
+                print!("Player {}'s turn | ", player);
+                if self.string.len() > 0 {
+                    println!("{}", &self.string);
+                } else {
+                    println!("None");
+                }
+
                 // assistance mode
                 if self.options.assist {
                     println!("Valid Options: {:?}", &valid_options);
@@ -104,6 +109,7 @@ impl Game {
                             continue;
                         } else {
                             printer::print_loss(player);
+                            printer::print_loss_stack(&self.string, self.options.substr_len, &c);
                             return 0; // success
                         }
                     }
