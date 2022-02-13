@@ -54,12 +54,10 @@ pub fn read_substr_len() -> Result<u8, &'static str> {
     read_u8("Enter the substring length", "substring", 10, 3)
 }
 
-pub fn read_assist() -> Result<bool, &'static str> {
+fn read_bool(query: &str, yes: &str, no: &str) -> Result<bool, &'static str> {
     printer::clear_screen();
-    printer::print_prompt("Do you want assistance? (y)es/(n)o");
+    printer::print_prompt(format!("{} {}/{}", query, yes, no).as_str());
     let mut rl = Editor::<()>::new();
-    let no = vec!["n", "no"];
-    let yes = vec!["y", "ye", "yes"];
     loop {
         let readline = rl.readline("> ");
         match readline {
@@ -81,6 +79,10 @@ pub fn read_assist() -> Result<bool, &'static str> {
             }
         }
     }
+}
+
+pub fn read_assist() -> Result<bool, &'static str> {
+    read_bool("Do you want assistance?", "yes", "no")
 }
 
 pub fn read_chars() -> Result<HashSet<char>, &'static str> {
@@ -165,4 +167,8 @@ pub fn read_choice(set: &HashSet<char>) -> char {
             }
         }
     }
+}
+
+pub fn read_start() -> Result<bool, &'static str> {
+    read_bool("Do you want to start first?", "yes", "no")
 }
