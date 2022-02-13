@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 rustyline = "9.1.2"
 termion = "*"
+substring = "1.4.5"
