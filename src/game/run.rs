@@ -48,7 +48,7 @@ impl Game {
                 choices += 1;
             }
         }
-        
+
         choices
     }
 
@@ -104,16 +104,24 @@ impl Game {
                         loop {
                             let c = read_choice(&self.options.chars);
                             if !self.options.chars.contains(&c) {
-                                printer::print_error(format!("{} is not a valid choice", c).as_str());
+                                printer::print_error(
+                                    format!("{} is not a valid choice", c).as_str(),
+                                );
                                 continue;
                             }
                             if !valid_options.contains(&c) {
                                 if self.options.assist {
-                                    printer::print_error(format!("{} will make you lose!", c).as_str());
+                                    printer::print_error(
+                                        format!("{} will make you lose!", c).as_str(),
+                                    );
                                     continue;
                                 } else {
                                     printer::print_loss_computer(player, start);
-                                    printer::print_loss_stack(&self.string, self.options.substr_len, &c);
+                                    printer::print_loss_stack(
+                                        &self.string,
+                                        self.options.substr_len,
+                                        &c,
+                                    );
                                     return 0; // success
                                 }
                             }
@@ -121,7 +129,8 @@ impl Game {
                             self.string.push(c);
                             break;
                         }
-                    } else { // computer logic
+                    } else {
+                        // computer logic
                         let mut best_choice: char = '?';
                         let mut choices_count: u8 = 255;
                         for c in valid_options {
