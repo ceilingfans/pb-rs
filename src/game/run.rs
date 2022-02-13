@@ -4,6 +4,7 @@ use substring::Substring;
 
 use crate::configuration::{options::*, reader::*};
 use crate::util::printer;
+use crate::util::printer::print_loss_computer;
 
 fn get_options() -> Options {
     for arg in std::env::args() {
@@ -34,6 +35,23 @@ impl Game {
         }
     }
 
+    fn get_options(&self, ch: char) -> u8 {
+        let mut choices: u8 = 0;
+        let string = format!("{}{}", &self.string, ch);
+        let prefix = string.substring(
+            string.len() - (self.options.substr_len - 1) as usize,
+            string.len(),
+        );
+
+        for c in &self.options.chars {
+            if !string.contains(format!("{}{}", &prefix, &c).as_str()) {
+                choices += 1;
+            }
+        }
+        
+        choices
+    }
+
     fn get_valid_options(&self) -> HashSet<char> {
         if self.string.len() < self.options.substr_len as usize {
             return self.options.chars.clone();
@@ -58,8 +76,70 @@ impl Game {
         printer::clear_screen();
         // TODO: single player
         if self.options.players == 1 {
-            println!("Single player against a computer has not been implemented yet");
-            return 501; // not implemented
+            let start = read_start().unwrap();
+            loop {
+                for player in 1..3 {
+                    let valid_options = self.get_valid_options();
+                    // options check
+                    if valid_options.is_empty() {
+                        printer::print_loss_computer(player, start);
+                        return 0; // success
+                    }
+
+                    // human
+                    if (player == 1 && start) || (player == 2 && !start) {
+                        // print out current game string
+                        print!("It's your turn | ");
+                        if self.string.len() > 0 {
+                            println!("{}", &self.string);
+                        } else {
+                            println!("None");
+                        }
+
+                        // assistance mode
+                        if self.options.assist {
+                            println!("Valid Options: {:?}", &valid_options);
+                        }
+
+                        loop {
+                            let c = read_choice(&self.options.chars);
+                            if !self.options.chars.contains(&c) {
+                                printer::print_error(format!("{} is not a valid choice", c).as_str());
+                                continue;
+                            }
+                            if !valid_options.contains(&c) {
+                                if self.options.assist {
+                                    printer::print_error(format!("{} will make you lose!", c).as_str());
+                                    continue;
+                                } else {
+                                    printer::print_loss_computer(player, start);
+                                    printer::print_loss_stack(&self.string, self.options.substr_len, &c);
+                                    return 0; // success
+                                }
+                            }
+
+                            self.string.push(c);
+                            break;
+                        }
+                    } else { // computer logic
+                        let mut best_choice: char = '?';
+                        let mut choices_count: u8 = 255;
+                        for c in valid_options {
+                            let choices = self.get_options(c);
+                            if choices == 0 {
+                                print_loss_computer(1, true);
+                                return 0; // success
+                            }
+                            if choices < choices_count {
+                                best_choice = c;
+                                choices_count = choices;
+                            }
+                        }
+
+                        self.string.push(best_choice);
+                    }
+                }
+            }
         }
         loop {
             for player in 1..self.options.players + 1 {
@@ -156,5 +236,27 @@ mod tests {
         };
         // it should have no valid options
         assert_eq!(g2.get_valid_options().len(), 0);
+    }
+
+    #[test]
+    fn get_options() {
+        let mut opt = Options::default();
+        opt.substr_len = 3;
+        let g3 = Game {
+            string: String::from("00010020"),
+            options: opt,
+        };
+        assert_eq!(g3.get_options('0'), 0);
+    }
+
+    #[test]
+    fn get_options_all_available() {
+        let mut opt = Options::default();
+        opt.substr_len = 3;
+        let g4 = Game {
+            string: String::from("0001002"),
+            options: opt,
+        };
+        assert_eq!(g4.get_options('0'), 3);
     }
 }
