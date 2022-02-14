@@ -3,7 +3,6 @@ use substring::Substring;
 
 use crate::configuration::{options::*, reader::*};
 use crate::util::printer;
-use crate::util::printer::print_loss_computer;
 
 fn get_options() -> Options {
     for arg in std::env::args() {
@@ -76,8 +75,10 @@ impl Game {
         // TODO: single player
         if self.options.players == 1 {
             let start = read_start().unwrap();
+            printer::clear_screen();
             loop {
                 for player in 1..3 {
+                    printer::clear_screen();
                     let valid_options = self.get_valid_options();
                     // options check
                     if valid_options.is_empty() {
@@ -135,7 +136,7 @@ impl Game {
                         for c in valid_options {
                             let choices = self.get_options(c);
                             if choices == 0 {
-                                print_loss_computer(1, true);
+                                printer::print_loss_computer(1, true);
                                 return 0; // success
                             }
                             if choices < choices_count {
@@ -151,6 +152,7 @@ impl Game {
         }
         loop {
             for player in 1..self.options.players + 1 {
+                printer::clear_screen();
                 let valid_options = self.get_valid_options();
                 // start options check
                 if valid_options.is_empty() {
