@@ -59,7 +59,7 @@ pub fn print_loss_computer(player: u8, start: bool) {
 }
 
 pub fn clear_screen() {
-    println!("{}", clear::All);
+    print!("{}", clear::All);
 }
 
 pub fn print_loss_stack(string: &String, substr_len: u8, ch: &char) {
