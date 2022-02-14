@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 use rustyline::{error::ReadlineError, Editor};
-use termion::clear;
 
 use crate::util::printer;
 

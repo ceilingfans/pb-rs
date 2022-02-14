@@ -1,4 +1,3 @@
-use rustyline::{error::ReadlineError, Editor};
 use std::collections::HashSet;
 use substring::Substring;
 
