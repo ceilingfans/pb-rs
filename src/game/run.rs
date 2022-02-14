@@ -34,6 +34,10 @@ impl Game {
     }
 
     fn get_options(&self, ch: char) -> u8 {
+        if self.string.len() < self.options.substr_len as usize {
+            return self.options.chars.len() as u8;
+        }
+
         let mut choices: u8 = 0;
         let string = format!("{}{}", &self.string, ch);
         let prefix = string.substring(
