@@ -1,6 +1,6 @@
 extern crate termion;
 
-use termion::{clear, color, style};
+use termion::{clear, color, style, cursor};
 
 use substring::Substring;
 
@@ -59,7 +59,7 @@ pub fn print_loss_computer(player: u8, start: bool) {
 }
 
 pub fn clear_screen() {
-    print!("{}", clear::All);
+    print!("{}{}", clear::All, cursor::Goto(1, 1));
 }
 
 pub fn print_loss_stack(string: &String, substr_len: u8, ch: &char) {
